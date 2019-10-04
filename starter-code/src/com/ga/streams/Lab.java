@@ -4,12 +4,13 @@ import org.junit.Test;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class Lab {
 
-    private List<Employee> employees = Arrays.asList(
+    private List<Employee> workers = Arrays.asList(
             new Employee("Bezos, Jeff", LocalDate.of(2004, 4, 2), 68_109.00, "Male"),
             new Employee("Sheryl Sandberg", LocalDate.of(2014, 7, 1), 87_846.00,"Female"),
             new Employee("Buffet, Warren", LocalDate.of(2011, 7, 23), 95_035.00, "Male"),
@@ -19,47 +20,78 @@ public class Lab {
     );
 
     private <T> void printList(List<T> list) {
-        System.out.println(list);
+        list.forEach(employee -> System.out.println(employee));
     }
 
     @Test
     public void getEmployeesOver50k() {
-        List<Employee> employees = null;
+        List<Employee> employees =
+            workers.stream()
+                .filter(employee -> employee.getSalary() >= 50_000)
+                .collect(Collectors.toList());
+
         printList(employees);
     }
 
     @Test
     public void getEmployeeNamesHiredAfter2012() {
-        List<String> employees = null;
+        List<Employee> employees =
+            workers.stream()
+                .filter(employee -> employee.getHireDate().compareTo(LocalDate.of(2012, 1, 1)) >= 0)
+                .collect(Collectors.toList());
+
         printList(employees);
     }
 
     @Test
     public void getMaxSalary() {
-        double max = 0;
-        System.out.println("Max:" + max);
+        Employee maxSalary =
+            workers.stream()
+                .max(Comparator.comparing(person -> person.getSalary()))
+                .orElse(null);
 
+        double max = maxSalary.getSalary();
+        System.out.println("Max:" + max);
     }
 
     @Test
     public void getMinSalary() {
-        double min = 0;
+        Employee minSalary =
+            workers.stream()
+                .min(Comparator.comparing(Employee::getSalary))
+                .orElse(null);
+
+        double min = minSalary.getSalary();
         System.out.println("Min:" + min);
     }
 
     @Test
     public void getAverageSalaries() {
-        double averageMale = 0;
-        double averageFemale = 0;
+        double averageMale =
+            workers.stream()
+                .filter(person -> person.getGender() == "Male")
+                .mapToDouble(person -> person.getSalary())
+                .average()
+                .getAsDouble();
 
-        System.out.println("Averages: Male:" + averageMale + " Female:" + averageFemale);
+        double averageFemale =
+            workers.stream()
+                .filter(person -> person.getGender() == "Female")
+                .mapToDouble(person -> person.getSalary())
+                .average()
+                .getAsDouble();
+
         System.out.println("Averages: Male:" + averageMale + " Female:" + averageFemale);
     }
 
     @Test
     public void getMaximumPaidEmployee() {
-        Employee highest = null;
-        System.out.println(highest);
+        Employee highest =
+            workers.stream()
+                .reduce((person1, person2) -> person1.getSalary() > person2.getSalary() ? person1 : person2)
+                .get();
+
+        System.out.println("Highest Paid: " + highest);
     }
 }
 
